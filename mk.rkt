@@ -1,9 +1,7 @@
 #lang racket
 
 ; (provide (all-defined-out))
-(provide run* run exist conde succeed fail ==)
-
-(define *display* #f)
+(provide run* run exist conde succeed fail == debug)
 
 
 ;;-------------------------- substitution ---------------------------
@@ -113,7 +111,8 @@
       [(not (stream? ainf))
        (cons ainf f)]
       [else
-       (cons (car ainf) (lambda () (mplus (f) (cdr ainf))))])))
+       (cons (car ainf)
+             (lambda () (mplus (f) (cdr ainf))))])))
 
 (define-syntax mplus*
   (syntax-rules ()
@@ -165,15 +164,24 @@
             (cons (car (car fv))
                   (take (and n (- n 1)) (cdr fv)))]))])))
 
+(define *display* #f)
+(define debug
+  (lambda (v)
+    (set! *display* v)))
+
+(define debug-display
+  (lambda (n contents)
+    (if *display*
+        (if (eq? n #f)
+            (pretty-print `(run* ,@contents))
+            (pretty-print `(run ,n ,@contents)))
+        (void))))
+
 (define-syntax run
   (syntax-rules ()
     ((_ n (x) g0 g ...)
      (begin
-       (if *display*
-           (if (eq? n #f)
-               (pretty-print '(run* (x) g0 g ...))
-               (pretty-print '(run n (x) g0 g ...)))
-           (void))
+       (debug-display n '(x g0 g ...))
        (take n
              (lambda ()
                ((exist (x) g0 g ...
