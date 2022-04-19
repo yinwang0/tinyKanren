@@ -81,6 +81,11 @@
 
 ;;-------------------------- multiplexing ---------------------------
 
+;; stream
+(define scons cons)
+(define scar car)
+(define scdr cdr)
+
 (define stream?
   (lambda (x)
     (and (pair? x) (procedure? (cdr x)))))
@@ -93,8 +98,8 @@
       [(not (stream? v))
        (g v)]
       [else
-       (mplus (g (car v))
-              (lambda () (bind ((cdr v)) g)))])))
+       (mplus (g (scar v))
+              (lambda () (bind ((scdr v)) g)))])))
 
 (define-syntax bind*
   (syntax-rules ()
@@ -110,10 +115,10 @@
     (cond
       [(not v) (f)]
       [(not (stream? v))
-       (cons v f)]
+       (scons v f)]
       [else
-       (cons (car v)
-             (lambda () (mplus (f) (cdr v))))])))
+       (scons (scar v)
+              (lambda () (mplus (f) (scdr v))))])))
 
 (define-syntax mplus*
   (syntax-rules ()
@@ -154,16 +159,15 @@
 (define take
   (lambda (n f)
     (cond
-      [(and n (zero? n))
-       '()]
+      [(and n (zero? n)) '()]
       [else
        (let ([v (f)])
          (cond
            [(not v) '()]
            [(not (stream? v)) v]
            [else
-            (cons (car (car v))
-                  (take (and n (- n 1)) (cdr v)))]))])))
+            (cons (scar v)
+                  (take (and n (- n 1)) (scdr v)))]))])))
 
 (define *display* #f)
 
@@ -186,9 +190,10 @@
        (debug-display n '(x g0 g ...))
        (take n
              (lambda ()
-               ((exist (x) g0 g ...
+               ((exist (x)
+                  g0 g ...
                   (lambda (s)
-                    (cons (reify x s) '())))
+                    (reify x s)))
                 empty-s))))]))
 
 (define-syntax run*
