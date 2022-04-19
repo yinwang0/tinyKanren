@@ -85,15 +85,15 @@
     (and (pair? x) (procedure? (cdr x)))))
 
 (define bind
-  (lambda (ainf g)
+  (lambda (v g)
     (cond
-      [(not ainf)
+      [(not v)
        (mzero)]
-      [(not (stream? ainf))
-       (g ainf)]
+      [(not (stream? v))
+       (g v)]
       [else
-       (mplus (g (car ainf))
-              (lambda () (bind ((cdr ainf)) g)))])))
+       (mplus (g (car v))
+              (lambda () (bind ((cdr v)) g)))])))
 
 (define-syntax bind*
   (syntax-rules ()
@@ -105,14 +105,14 @@
   (lambda () #f))
 
 (define mplus
-  (lambda (ainf f)
+  (lambda (v f)
     (cond
-      [(not ainf) (f)]
-      [(not (stream? ainf))
-       (cons ainf f)]
+      [(not v) (f)]
+      [(not (stream? v))
+       (cons v f)]
       [else
-       (cons (car ainf)
-             (lambda () (mplus (f) (cdr ainf))))])))
+       (cons (car v)
+             (lambda () (mplus (f) (cdr v))))])))
 
 (define-syntax mplus*
   (syntax-rules ()
@@ -156,15 +156,16 @@
       [(and n (zero? n))
        '()]
       [else
-       (let ([fv (f)])
+       (let ([v (f)])
          (cond
-           [(not fv) '()]
-           [(not (stream? fv)) fv]
+           [(not v) '()]
+           [(not (stream? v)) v]
            [else
-            (cons (car (car fv))
-                  (take (and n (- n 1)) (cdr fv)))]))])))
+            (cons (car (car v))
+                  (take (and n (- n 1)) (cdr v)))]))])))
 
 (define *display* #f)
+
 (define debug
   (lambda (v)
     (set! *display* v)))
@@ -179,7 +180,7 @@
 
 (define-syntax run
   (syntax-rules ()
-    ((_ n (x) g0 g ...)
+    [(_ n (x) g0 g ...)
      (begin
        (debug-display n '(x g0 g ...))
        (take n
@@ -187,7 +188,7 @@
                ((exist (x) g0 g ...
                   (lambda (s)
                     (cons (reify x s) '())))
-                empty-s)))))))
+                empty-s))))]))
 
 (define-syntax run*
   (syntax-rules ()
