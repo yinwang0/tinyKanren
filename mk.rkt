@@ -25,15 +25,16 @@
   (lambda (v s)
     (cond
       [(var? v)
-       (let ([a (assq v s)])
+       (let ([p (assq v s)])
          (cond
-           [a (walk (cdr a) s)]
-           [else v]))]
+           [(not p) v]
+           [else
+            (walk (cdr p) s)]))]
       [else v])))
 
 (define walk*
-  (lambda (w s)
-    (let ((v (walk w s)))
+  (lambda (v s)
+    (let ([v (walk v s)])
       (cond
         ((var? v) v)
         ((pair? v)
@@ -44,8 +45,8 @@
 
 (define unify
   (lambda (u v s)
-    (let ((u (walk u s))
-          (v (walk v s)))
+    (let ([u (walk u s)]
+          [v (walk v s)])
       (cond
         [(eq? u v) s]
         [(var? u) (ext-s u v s)]
@@ -56,7 +57,7 @@
         [(equal? u v) s]
         [else #f]))))
 
-(define reify-name
+(define new-name
   (lambda (n)
     (string->symbol
      (string-append "_" (number->string n)))))
@@ -66,7 +67,7 @@
     (let ([v (walk v s)])
       (cond
         [(var? v)
-         (ext-s v (reify-name (size-s s)) s)]
+         (ext-s v (new-name (size-s s)) s)]
         [(pair? v)
          (reify-s (cdr v)
                   (reify-s (car v) s))]
@@ -74,8 +75,8 @@
 
 (define reify
   (lambda (v s)
-    (let ([v1 (walk* v s)])
-      (walk* v1 (reify-s v1 empty-s)))))
+    (let ([v (walk* v s)])
+      (walk* v (reify-s v empty-s)))))
 
 
 ;;-------------------------- multiplexing ---------------------------
