@@ -155,7 +155,7 @@
 (define take
   (lambda (n f)
     (cond
-      [(and n (zero? n)) '()]
+      [(zero? n) '()]
       [else
        (let ([v (f)])
          (cond
@@ -163,7 +163,7 @@
            [(not (stream? v)) v]
            [else
             (cons (scar v)
-                  (take (and n (- n 1)) (scdr v)))]))])))
+                  (take (- n 1) (scdr v)))]))])))
 
 (define *display* #f)
 
@@ -195,4 +195,4 @@
 (define-syntax run*
   (syntax-rules ()
     [(_ (x) g ...)
-     (run #f (x) g ...)]))
+     (run +inf.0 (x) g ...)]))
