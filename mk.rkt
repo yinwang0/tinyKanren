@@ -93,8 +93,7 @@
 (define bind
   (lambda (v g)
     (cond
-      [(not v)
-       (mzero)]
+      [(not v) #f]
       [(not (stream? v))
        (g v)]
       [else
@@ -106,9 +105,6 @@
     [(_ e) e]
     [(_ e g0 g ...)
      (bind* (bind e g0) g ...)]))
-
-(define mzero
-  (lambda () #f))
 
 (define mplus
   (lambda (v f)
