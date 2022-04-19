@@ -82,27 +82,20 @@
 
 ;;-------------------------- multiplexing ---------------------------
 
-(define-syntax case-inf
-  (syntax-rules ()
-    [(_ e (() e0 ...) ((a^) e2 ...) ((a f) e3 ...))
-     (let ([a-inf e])
-       (cond
-         [(not a-inf) e0 ...]
-         [(not (and (pair? a-inf)
-                    (procedure? (cdr a-inf))))
-          (let ([a^ a-inf]) e2 ...)]
-         [else
-          (let ([a (car a-inf)]
-                [f (cdr a-inf)])
-            e3 ...)]))]))
+(define stream?
+  (lambda (x)
+    (and (pair? x) (procedure? (cdr x)))))
 
 (define bind
-  (lambda (a-inf g)
-    (case-inf a-inf
-      [() (mzero)]
-      [(a) (g a)]
-      [(a f)
-       (mplus (g a) (lambda () (bind (f) g)))])))
+  (lambda (ainf g)
+    (cond
+      [(not ainf)
+       (mzero)]
+      [(not (stream? ainf))
+       (g ainf)]
+      [else
+       (mplus (g (car ainf))
+              (lambda () (bind ((cdr ainf)) g)))])))
 
 (define-syntax bind*
   (syntax-rules ()
@@ -114,12 +107,13 @@
   (lambda () #f))
 
 (define mplus
-  (lambda (a-inf f)
-    (case-inf a-inf
-      [() (f)]
-      [(a) (cons a f)]
-      [(a f^)
-       (cons a (lambda () (mplus (f) f^)))])))
+  (lambda (ainf f)
+    (cond
+      [(not ainf) (f)]
+      [(not (stream? ainf))
+       (cons ainf f)]
+      [else
+       (cons (car ainf) (lambda () (mplus (f) (cdr ainf))))])))
 
 (define-syntax mplus*
   (syntax-rules ()
@@ -163,12 +157,13 @@
       [(and n (zero? n))
        '()]
       [else
-       (case-inf (f)
-         [() '()]
-         [(a) a]
-         [(a f)
-          (cons (car a)
-                (take (and n (- n 1)) f))])])))
+       (let ([fv (f)])
+         (cond
+           [(not fv) '()]
+           [(not (stream? fv)) fv]
+           [else
+            (cons (car (car fv))
+                  (take (and n (- n 1)) (cdr fv)))]))])))
 
 (define-syntax run
   (syntax-rules ()
