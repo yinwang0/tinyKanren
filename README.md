@@ -1,2 +1,3 @@
 # tinyKanren
-a simplified version of the original miniKanren
+
+A simplified version of the [original miniKanren](https://github.com/webyrd/miniKanren).
