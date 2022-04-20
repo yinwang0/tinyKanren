@@ -74,25 +74,25 @@
 
 ;;-------------------------- multiplexing ---------------------------
 
-(struct Stream (head tail))
+(struct stream (head tail))
 
-(struct Thunk (func))
+(struct thunk (func))
 
 (define-syntax delay
   (syntax-rules ()
-    [(_ e ...) (Thunk (lambda () e ...))]))
+    [(_ e ...) (thunk (lambda () e ...))]))
 
 (define force
-  (lambda (thunk)
-    ((Thunk-func thunk))))
+  (lambda (th)
+    ((thunk-func th))))
 
 (define bind
   (lambda (v g)
     (match v
       [#f #f]
-      [(Thunk _)
+      [(thunk _)
        (delay (bind (force v) g))]
-      [(Stream head tail)
+      [(stream head tail)
        (mplus (g head)
               (delay (bind (force tail) g)))]
       [_ (g v)])))
@@ -105,12 +105,12 @@
   (lambda (v f)
     (match v
       [#f (force f)]
-      [(Thunk _)
+      [(thunk _)
        (delay (mplus (force f) v))]
-      [(Stream head tail)
-       (Stream head
+      [(stream head tail)
+       (stream head
                (delay (mplus (force f) tail)))]
-      [_ (Stream v f)])))
+      [_ (stream v f)])))
 
 (define-syntax mplus*
   (syntax-rules ()
@@ -157,9 +157,9 @@
       [else
        (match v
          [#f '()]
-         [(Thunk _)
+         [(thunk _)
           (take n (force v))]
-         [(Stream head tail)
+         [(stream head tail)
           (cons head (take (- n 1) tail))]
          [_ (list v)])])))
 
