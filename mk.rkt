@@ -137,7 +137,8 @@
 (define ==
   (lambda (u v)
     (lambda (s)
-      (unify u v s))))
+      (delay
+        (unify u v s)))))
 
 (define succeed (== #f #f))
 (define fail (== #f #t))
