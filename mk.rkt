@@ -163,16 +163,16 @@
        (cons (scar v)
              (take (- n 1) ((scdr v))))])))
 
-(define *display* #f)
+(define do-display #f)
 
 (define debug
   (lambda (v)
-    (set! *display* v)))
+    (set! do-display v)))
 
 (define debug-display
   (lambda (n contents)
-    (if *display*
-        (if (eq? n #f)
+    (if do-display
+        (if (eq? n +inf.0)
             (pretty-print `(run* ,@contents))
             (pretty-print `(run ,n ,@contents)))
         (void))))
@@ -182,12 +182,11 @@
     [(_ n (x) g0 g ...)
      (begin
        (debug-display n '(x g0 g ...))
-       (take n
-             ((exist (x)
-                g0 g ...
-                (lambda (s)
-                  (reify x s)))
-              empty-s)))]))
+       (let ([top-g (exist (x)
+                      g0 g ...
+                      (lambda (s)
+                        (reify x s)))])
+         (take n (top-g empty-s))))]))
 
 (define-syntax run*
   (syntax-rules ()
