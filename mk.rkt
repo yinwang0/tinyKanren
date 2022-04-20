@@ -1,6 +1,5 @@
 #lang racket
 
-; (provide (all-defined-out))
 (provide run* run exist conde succeed fail == debug)
 
 
@@ -81,7 +80,7 @@
 
 ;;-------------------------- multiplexing ---------------------------
 
-;; stream
+;; stream (lazy list)
 (define scons cons)
 (define scar car)
 (define scdr cdr)
@@ -172,7 +171,7 @@
 (define debug-display
   (lambda (n contents)
     (if do-display
-        (if (eq? n +inf.0)
+        (if (= n +inf.0)
             (pretty-print `(run* ,@contents))
             (pretty-print `(run ,n ,@contents)))
         (void))))
