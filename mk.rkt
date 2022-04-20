@@ -29,12 +29,12 @@
   (lambda (v s)
     (let ([v (walk v s)])
       (cond
-        ((var? v) v)
-        ((pair? v)
+        [(var? v) v]
+        [(pair? v)
          (cons
           (walk* (car v) s)
-          (walk* (cdr v) s)))
-        (else v)))))
+          (walk* (cdr v) s))]
+        [else v]))))
 
 (define unify
   (lambda (u v s)
@@ -75,7 +75,6 @@
 ;;-------------------------- multiplexing ---------------------------
 
 (struct stream (head tail))
-
 (struct thunk (func))
 
 (define-syntax delay
