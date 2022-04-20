@@ -76,20 +76,22 @@
 
 (struct Stream (head tail))
 
+(struct Thunk (func))
+
 (define-syntax delay
   (syntax-rules ()
-    [(_ e ...) (lambda () e ...)]))
+    [(_ e ...) (Thunk (lambda () e ...))]))
 
 (define force
   (lambda (thunk)
-    (thunk)))
+    ((Thunk-func thunk))))
 
 (define bind
   (lambda (v g)
     (match v
       [#f #f]
-      [(? procedure? v)
-       (delay (bind (v) g))]
+      [(Thunk _)
+       (delay (bind (force v) g))]
       [(Stream head tail)
        (mplus (g head)
               (delay (bind (force tail) g)))]
@@ -103,7 +105,7 @@
   (lambda (v f)
     (match v
       [#f (force f)]
-      [(? procedure? v)
+      [(Thunk _)
        (delay (mplus (force f) v))]
       [(Stream head tail)
        (Stream head
@@ -155,8 +157,8 @@
       [else
        (match v
          [#f '()]
-         [(? procedure? v)
-          (take n (v))]
+         [(Thunk _)
+          (take n (force v))]
          [(Stream head tail)
           (cons head (take (- n 1) tail))]
          [_ (list v)])])))
