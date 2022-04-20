@@ -91,25 +91,25 @@
 
 (define-syntax delay
   (syntax-rules ()
-    [(_ e) (lambda () e)]))
+    [(_ e ...) (lambda () e ...)]))
 
 (define force
   (lambda (thunk)
     (thunk)))
 
 (define bind
-  (lambda (g v)
+  (lambda (v g)
     (cond
       [(not v) #f]
       [(not (stream? v))
        (g v)]
       [else
        (mplus (g (scar v))
-              (delay (bind g (force (scdr v)))))])))
+              (delay (bind (force (scdr v)) g)))])))
 
 (define bind*
   (lambda (v gs)
-    (foldl bind v gs)))
+    (foldl (lambda (g v) (bind v g)) v gs)))
 
 (define mplus
   (lambda (v f)
