@@ -92,15 +92,14 @@
 
 (define bind
   (lambda (v g)
-    (cond
-      [(not v) #f]
-      [(procedure? v)
+    (match v
+      [#f #f]
+      [(? procedure? v)
        (delay (bind (v) g))]
-      [(not (Stream? v))
-       (g v)]
-      [else
-       (mplus (g (Stream-head v))
-              (delay (bind (force (Stream-tail v)) g)))])))
+      [(Stream head tail)
+       (mplus (g head)
+              (delay (bind (force tail) g)))]
+      [_ (g v)])))
 
 (define bind*
   (lambda (v gs)
@@ -108,15 +107,14 @@
 
 (define mplus
   (lambda (v f)
-    (cond
-      [(not v) (force f)]
-      [(procedure? v)
+    (match v
+      [#f (force f)]
+      [(? procedure? v)
        (delay (mplus (force f) v))]
-      [(not (Stream? v))
-       (Stream v f)]
-      [else
-       (Stream (Stream-head v)
-              (delay (mplus (force f) (Stream-tail v))))])))
+      [(Stream head tail)
+       (Stream head
+               (delay (mplus (force f) tail)))]
+      [_ (Stream v f)])))
 
 (define-syntax mplus*
   (syntax-rules ()
@@ -130,7 +128,7 @@
 (define ==
   (lambda (u v)
     (lambda (s)
-        (unify u v s))))
+      (unify u v s))))
 
 (define succeed (== #f #f))
 (define fail (== #f #t))
@@ -160,13 +158,14 @@
   (lambda (n v)
     (cond
       [(zero? n) '()]
-      [(not v) '()]
-      [(procedure? v)
-       (take n (v))]
-      [(not (Stream? v)) (list v)]
       [else
-       (cons (Stream-head v)
-             (take (- n 1) (Stream-tail v)))])))
+       (match v
+         [#f '()]
+         [(? procedure? v)
+          (take n (v))]
+         [(Stream head tail)
+          (cons head (take (- n 1) tail))]
+         [_ (list v)])])))
 
 (define do-display #f)
 
