@@ -4,16 +4,10 @@
 
 
 ;;-------------------------- substitution ---------------------------
-(define var
-  (lambda (name)
-    (vector name)))
 
-(define var?
-  (lambda (x)
-    (vector? x)))
+(struct Var (name))
 
 (define empty-s '())
-
 (define size-s length)
 
 (define ext-s
@@ -23,7 +17,7 @@
 (define walk
   (lambda (v s)
     (cond
-      [(var? v)
+      [(Var? v)
        (let ([p (assq v s)])
          (cond
            [(not p) v]
@@ -35,7 +29,7 @@
   (lambda (v s)
     (let ([v (walk v s)])
       (cond
-        ((var? v) v)
+        ((Var? v) v)
         ((pair? v)
          (cons
           (walk* (car v) s)
@@ -48,8 +42,8 @@
           [v (walk v s)])
       (cond
         [(eq? u v) s]
-        [(var? u) (ext-s u v s)]
-        [(var? v) (ext-s v u s)]
+        [(Var? u) (ext-s u v s)]
+        [(Var? v) (ext-s v u s)]
         [(and (pair? u) (pair? v))
          (let ([s (unify (car u) (car v) s)])
            (and s (unify (cdr u) (cdr v) s)))]
@@ -65,7 +59,7 @@
   (lambda (v s)
     (let ([v (walk v s)])
       (cond
-        [(var? v)
+        [(Var? v)
          (ext-s v (name (size-s s)) s)]
         [(pair? v)
          (reify-s (cdr v)
@@ -138,7 +132,7 @@
     [(_ (x ...) g0 g ...)
      (lambda (s)
        (delay
-         (let ([x (var 'x)] ...)
+         (let ([x (Var 'x)] ...)
            (bind* s (list g0 g ...)))))]))
 
 (define-syntax conde
