@@ -5,7 +5,7 @@
 
 ;;--------------------- substitution ----------------------
 
-(struct var (name))
+(struct var (name) #:transparent)
 
 (define empty-s '())
 (define size-s length)
