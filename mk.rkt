@@ -153,17 +153,15 @@
 ;;---------------------------- top level ----------------------------
 
 (define take
-  (lambda (n f)
+  (lambda (n v)
     (cond
       [(zero? n) '()]
+      [(not v) '()]
+      [(not (stream? v))
+       (list v)]
       [else
-       (let ([v (f)])
-         (cond
-           [(not v) '()]
-           [(not (stream? v)) v]
-           [else
-            (cons (scar v)
-                  (take (- n 1) (scdr v)))]))])))
+       (cons (scar v)
+             (take (- n 1) ((scdr v))))])))
 
 (define *display* #f)
 
@@ -185,12 +183,11 @@
      (begin
        (debug-display n '(x g0 g ...))
        (take n
-             (lambda ()
-               ((exist (x)
-                  g0 g ...
-                  (lambda (s)
-                    (reify x s)))
-                empty-s))))]))
+             ((exist (x)
+                g0 g ...
+                (lambda (s)
+                  (reify x s)))
+              empty-s)))]))
 
 (define-syntax run*
   (syntax-rules ()
