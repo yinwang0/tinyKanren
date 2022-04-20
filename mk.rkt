@@ -80,14 +80,7 @@
 
 ;;-------------------------- multiplexing ---------------------------
 
-;; stream (lazy list)
-(define scons cons)
-(define scar car)
-(define scdr cdr)
-
-(define stream?
-  (lambda (x)
-    (and (pair? x) (procedure? (cdr x)))))
+(struct Stream (head tail))
 
 (define-syntax delay
   (syntax-rules ()
@@ -103,11 +96,11 @@
       [(not v) #f]
       [(procedure? v)
        (delay (bind (v) g))]
-      [(not (stream? v))
+      [(not (Stream? v))
        (g v)]
       [else
-       (mplus (g (scar v))
-              (delay (bind (force (scdr v)) g)))])))
+       (mplus (g (Stream-head v))
+              (delay (bind (force (Stream-tail v)) g)))])))
 
 (define bind*
   (lambda (v gs)
@@ -119,11 +112,11 @@
       [(not v) (force f)]
       [(procedure? v)
        (delay (mplus (force f) v))]
-      [(not (stream? v))
-       (scons v f)]
+      [(not (Stream? v))
+       (Stream v f)]
       [else
-       (scons (scar v)
-              (delay (mplus (force f) (scdr v))))])))
+       (Stream (Stream-head v)
+              (delay (mplus (force f) (Stream-tail v))))])))
 
 (define-syntax mplus*
   (syntax-rules ()
@@ -170,10 +163,10 @@
       [(not v) '()]
       [(procedure? v)
        (take n (v))]
-      [(not (stream? v)) v]
+      [(not (Stream? v)) (list v)]
       [else
-       (cons (car (scar v))
-             (take (- n 1) (scdr v)))])))
+       (cons (Stream-head v)
+             (take (- n 1) (Stream-tail v)))])))
 
 (define do-display #f)
 
@@ -197,7 +190,7 @@
        (let ([top-g (exist (x)
                       g0 g ...
                       (lambda (s)
-                        (list (reify x s))))])
+                        (reify x s)))])
          (take n (top-g empty-s))))]))
 
 (define-syntax run*
