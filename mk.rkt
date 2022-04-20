@@ -118,7 +118,7 @@
     (cond
       [(not v) (force f)]
       [(procedure? v)
-       (delay (mplus (f) v))]
+       (delay (mplus (force f) v))]
       [(not (stream? v))
        (scons v f)]
       [else
@@ -137,8 +137,7 @@
 (define ==
   (lambda (u v)
     (lambda (s)
-      (delay
-        (unify u v s)))))
+        (unify u v s))))
 
 (define succeed (== #f #f))
 (define fail (== #f #t))
@@ -171,11 +170,10 @@
       [(not v) '()]
       [(procedure? v)
        (take n (v))]
-      [(not (stream? v))
-       (list v)]
+      [(not (stream? v)) v]
       [else
-       (cons (scar v)
-             (take (- n 1) (force (scdr v))))])))
+       (cons (car (scar v))
+             (take (- n 1) (scdr v)))])))
 
 (define do-display #f)
 
@@ -199,7 +197,7 @@
        (let ([top-g (exist (x)
                       g0 g ...
                       (lambda (s)
-                        (reify x s)))])
+                        (list (reify x s))))])
          (take n (top-g empty-s))))]))
 
 (define-syntax run*
