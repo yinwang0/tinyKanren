@@ -3,7 +3,7 @@
 (provide run* run == exist conde succeed fail display-code)
 
 
-;;-------------------------- substitution ---------------------------
+;;--------------------- substitution ----------------------
 
 (struct var (name))
 
@@ -72,7 +72,7 @@
       (walk* v (reify-s v empty-s)))))
 
 
-;;-------------------------- multiplexing ---------------------------
+;;--------------------- multiplexing ----------------------
 
 (struct stream (head tail))
 (struct thunk (func))
@@ -119,7 +119,7 @@
      (mplus e0 (delay (mplus* e ...)))]))
 
 
-;;------------------------ goal constructors ------------------------
+;;------------------- goal constructors -------------------
 
 (define ==
   (lambda (u v)
@@ -148,7 +148,7 @@
           (bind* s (list g1 g^ ...)) ...)))]))
 
 
-;;---------------------------- top level ----------------------------
+;;----------------------- top level -----------------------
 
 (define take
   (lambda (n v)
@@ -173,7 +173,7 @@
   (lambda (n contents)
     (cond
       [do-display
-       (display "----------------------------------------\n")
+       (display "-----------------------------------\n")
        (if (= n +inf.0)
            (pretty-print `(run* ,@contents))
            (pretty-print `(run ,n ,@contents)))]
