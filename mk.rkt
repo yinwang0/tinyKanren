@@ -101,6 +101,8 @@
   (lambda (v g)
     (cond
       [(not v) #f]
+      [(procedure? v)
+       (delay (bind (v) g))]
       [(not (stream? v))
        (g v)]
       [else
@@ -115,6 +117,8 @@
   (lambda (v f)
     (cond
       [(not v) (force f)]
+      [(procedure? v)
+       (delay (mplus (f) v))]
       [(not (stream? v))
        (scons v f)]
       [else
@@ -142,17 +146,19 @@
   (syntax-rules ()
     [(_ (x ...) g0 g ...)
      (lambda (s)
-       (let ([x (var 'x)] ...)
-         (bind* s (list g0 g ...))))]))
+       (delay
+         (let ([x (var 'x)] ...)
+           (bind* s (list g0 g ...)))))]))
 
 (define-syntax conde
   (syntax-rules ()
     [(_ [g0 g ...]
         [g1 g^ ...] ...)
      (lambda (s)
-       (mplus*
-        (bind* s (list g0 g ...))
-        (bind* s (list g1 g^ ...)) ...))]))
+       (delay
+         (mplus*
+          (bind* s (list g0 g ...))
+          (bind* s (list g1 g^ ...)) ...)))]))
 
 
 ;;---------------------------- top level ----------------------------
@@ -162,6 +168,8 @@
     (cond
       [(zero? n) '()]
       [(not v) '()]
+      [(procedure? v)
+       (take n (v))]
       [(not (stream? v))
        (list v)]
       [else
