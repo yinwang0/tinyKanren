@@ -89,6 +89,14 @@
   (lambda (x)
     (and (pair? x) (procedure? (cdr x)))))
 
+(define-syntax delay
+  (syntax-rules ()
+    [(_ e) (lambda () e)]))
+
+(define force
+  (lambda (thunk)
+    (thunk)))
+
 (define bind
   (lambda (g v)
     (cond
@@ -97,27 +105,27 @@
        (g v)]
       [else
        (mplus (g (scar v))
-              (lambda () (bind g ((scdr v)))))])))
+              (delay (bind g (force (scdr v)))))])))
 
 (define bind*
-  (lambda (e gs)
-    (foldl bind e gs)))
+  (lambda (v gs)
+    (foldl bind v gs)))
 
 (define mplus
   (lambda (v f)
     (cond
-      [(not v) (f)]
+      [(not v) (force f)]
       [(not (stream? v))
        (scons v f)]
       [else
        (scons (scar v)
-              (lambda () (mplus (f) (scdr v))))])))
+              (delay (mplus (force f) (scdr v))))])))
 
 (define-syntax mplus*
   (syntax-rules ()
     [(_ e) e]
     [(_ e0 e ...)
-     (mplus e0 (lambda () (mplus* e ...)))]))
+     (mplus e0 (delay (mplus* e ...)))]))
 
 
 ;;------------------------ goal constructors ------------------------
@@ -158,7 +166,7 @@
        (list v)]
       [else
        (cons (scar v)
-             (take (- n 1) ((scdr v))))])))
+             (take (- n 1) (force (scdr v))))])))
 
 (define do-display #f)
 
