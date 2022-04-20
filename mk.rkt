@@ -5,7 +5,7 @@
 
 ;;-------------------------- substitution ---------------------------
 
-(struct Var (name))
+(struct var (name))
 
 (define empty-s '())
 (define size-s length)
@@ -17,7 +17,7 @@
 (define walk
   (lambda (v s)
     (cond
-      [(Var? v)
+      [(var? v)
        (let ([p (assq v s)])
          (cond
            [(not p) v]
@@ -29,7 +29,7 @@
   (lambda (v s)
     (let ([v (walk v s)])
       (cond
-        ((Var? v) v)
+        ((var? v) v)
         ((pair? v)
          (cons
           (walk* (car v) s)
@@ -42,8 +42,8 @@
           [v (walk v s)])
       (cond
         [(eq? u v) s]
-        [(Var? u) (ext-s u v s)]
-        [(Var? v) (ext-s v u s)]
+        [(var? u) (ext-s u v s)]
+        [(var? v) (ext-s v u s)]
         [(and (pair? u) (pair? v))
          (let ([s (unify (car u) (car v) s)])
            (and s (unify (cdr u) (cdr v) s)))]
@@ -59,7 +59,7 @@
   (lambda (v s)
     (let ([v (walk v s)])
       (cond
-        [(Var? v)
+        [(var? v)
          (ext-s v (name (size-s s)) s)]
         [(pair? v)
          (reify-s (cdr v)
@@ -135,7 +135,7 @@
     [(_ (x ...) g0 g ...)
      (lambda (s)
        (delay
-         (let ([x (Var 'x)] ...)
+         (let ([x (var 'x)] ...)
            (bind* s (list g0 g ...)))))]))
 
 (define-syntax conde
