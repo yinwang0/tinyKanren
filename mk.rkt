@@ -80,7 +80,8 @@
 
 (define-syntax delay
   (syntax-rules ()
-    [(_ e ...) (thunk (lambda () e ...))]))
+    [(_ e ...)
+     (thunk (lambda () e ...))]))
 
 (define force
   (lambda (th)
