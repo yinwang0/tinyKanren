@@ -1,6 +1,6 @@
 #lang racket
 
-(provide run* run exist conde succeed fail == debug)
+(provide run* run == exist conde succeed fail display-code)
 
 
 ;;-------------------------- substitution ---------------------------
@@ -166,17 +166,19 @@
 
 (define do-display #f)
 
-(define debug
+(define display-code
   (lambda (v)
     (set! do-display v)))
 
 (define debug-display
   (lambda (n contents)
-    (if do-display
-        (if (= n +inf.0)
-            (pretty-print `(run* ,@contents))
-            (pretty-print `(run ,n ,@contents)))
-        (void))))
+    (cond
+      [do-display
+       (display "----------------------------------------\n")
+       (if (= n +inf.0)
+           (pretty-print `(run* ,@contents))
+           (pretty-print `(run ,n ,@contents)))]
+      [else (void)])))
 
 (define-syntax run
   (syntax-rules ()
