@@ -56,7 +56,7 @@
         [(equal? u v) s]
         [else #f]))))
 
-(define new-name
+(define name
   (lambda (n)
     (string->symbol
      (string-append "_" (number->string n)))))
@@ -66,7 +66,7 @@
     (let ([v (walk v s)])
       (cond
         [(var? v)
-         (ext-s v (new-name (size-s s)) s)]
+         (ext-s v (name (size-s s)) s)]
         [(pair? v)
          (reify-s (cdr v)
                   (reify-s (car v) s))]
@@ -90,20 +90,18 @@
     (and (pair? x) (procedure? (cdr x)))))
 
 (define bind
-  (lambda (v g)
+  (lambda (g v)
     (cond
       [(not v) #f]
       [(not (stream? v))
        (g v)]
       [else
        (mplus (g (scar v))
-              (lambda () (bind ((scdr v)) g)))])))
+              (lambda () (bind g ((scdr v)))))])))
 
-(define-syntax bind*
-  (syntax-rules ()
-    [(_ e) e]
-    [(_ e g0 g ...)
-     (bind* (bind e g0) g ...)]))
+(define bind*
+  (lambda (e gs)
+    (foldl bind e gs)))
 
 (define mplus
   (lambda (v f)
@@ -137,7 +135,7 @@
     [(_ (x ...) g0 g ...)
      (lambda (s)
        (let ([x (var 'x)] ...)
-         (bind* s g0 g ...)))]))
+         (bind* s (list g0 g ...))))]))
 
 (define-syntax conde
   (syntax-rules ()
@@ -145,8 +143,8 @@
         [g1 g^ ...] ...)
      (lambda (s)
        (mplus*
-        (bind* s g0 g ...)
-        (bind* s g1 g^ ...) ...))]))
+        (bind* s (list g0 g ...))
+        (bind* s (list g1 g^ ...)) ...))]))
 
 
 ;;---------------------------- top level ----------------------------
