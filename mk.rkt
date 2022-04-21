@@ -74,8 +74,8 @@
 
 ;;---------------------- composition ----------------------
 
-(struct stream (head tail))
-(struct thunk (func))
+(struct stream (head tail) #:transparent)
+(struct thunk (func) #:transparent)
 
 (define-syntax delay
   (syntax-rules ()
