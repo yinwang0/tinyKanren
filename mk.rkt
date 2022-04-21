@@ -75,15 +75,16 @@
 ;;---------------------- composition ----------------------
 
 (struct stream (head tail) #:transparent)
+(struct thunk (func) #:transparent)
 
 (define-syntax delay
   (syntax-rules ()
     [(_ e ...)
-     (lambda () e ...)]))
+     (thunk (lambda () e ...))]))
 
 (define force
   (lambda (th)
-    (th)))
+    ((thunk-func th))))
 
 (define flip
   (lambda (f)
