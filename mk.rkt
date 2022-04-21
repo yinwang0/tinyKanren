@@ -190,7 +190,7 @@
   (syntax-rules ()
     [(_ n (x) g0 g ...)
      (begin
-       (debug-display n '(x g0 g ...))
+       (debug-display n '((x) g0 g ...))
        (let ([top-g (exist (x)
                       g0 g ...
                       (lambda (s)
