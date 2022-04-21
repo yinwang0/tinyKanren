@@ -97,9 +97,14 @@
               (delay (bind (force tail) g)))]
       [_ (g v)])))
 
+(define flip
+  (lambda (f)
+    (lambda (x y)
+      (f y x))))
+
 (define bind*
   (lambda (v gs)
-    (foldl (lambda (g v) (bind v g)) v gs)))
+    (foldl (flip bind) v gs)))
 
 (define mplus
   (lambda (v f)
