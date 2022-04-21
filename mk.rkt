@@ -72,7 +72,7 @@
       (walk* v (reify-s v empty-s)))))
 
 
-;;--------------------- multiplexing ----------------------
+;;---------------------- composition ----------------------
 
 (struct stream (head tail))
 (struct thunk (func))
@@ -86,6 +86,11 @@
   (lambda (th)
     ((thunk-func th))))
 
+(define flip
+  (lambda (f)
+    (lambda (x y)
+      (f y x))))
+
 (define bind
   (lambda (v g)
     (match v
@@ -96,11 +101,6 @@
        (mplus (g head)
               (delay (bind (force tail) g)))]
       [_ (g v)])))
-
-(define flip
-  (lambda (f)
-    (lambda (x y)
-      (f y x))))
 
 (define bind*
   (lambda (v gs)
