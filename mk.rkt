@@ -1,6 +1,6 @@
 #lang racket
 
-(provide run* run == exist conde succeed fail display-code)
+(provide run* run == exist conde succeed fail display-code var empty-s take)
 
 
 ;;--------------------- substitution ----------------------
@@ -134,17 +134,17 @@
   (syntax-rules ()
     [(_ (x ...) g0 g ...)
      (lambda (s)
-         (let ([x (var 'x)] ...)
-           (bind* s (list g0 g ...))))]))
+       (let ([x (var 'x)] ...)
+         (bind* s (list g0 g ...))))]))
 
 (define-syntax conde
   (syntax-rules ()
     [(_ [g0 g ...]
         [g1 g^ ...] ...)
      (lambda (s)
-         (mplus*
-          (bind* s (list g0 g ...))
-          (bind* s (list g1 g^ ...)) ...))]))
+       (mplus*
+        (bind* s (list g0 g ...))
+        (bind* s (list g1 g^ ...)) ...))]))
 
 
 ;;----------------------- top level -----------------------
