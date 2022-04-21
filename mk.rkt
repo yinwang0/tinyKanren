@@ -101,8 +101,14 @@
       [_ (g v)])))
 
 (define bind*
-  (lambda (v gs)
+  (lambda (v . gs)
     (foldl (flip bind) v gs)))
+
+;(define-syntax bind*
+;  (syntax-rules ()
+;    [(_ e) e]
+;    [(_ e g0 g ...)     
+;     (bind* (bind e g0) g ...)]))
 
 (define mplus
   (lambda (v f)
@@ -135,7 +141,7 @@
     [(_ (x ...) g0 g ...)
      (lambda (s)
        (let ([x (var 'x)] ...)
-         (bind* s (list g0 g ...))))]))
+         (bind* s g0 g ...)))]))
 
 (define-syntax conde
   (syntax-rules ()
@@ -143,8 +149,8 @@
         [g1 g^ ...] ...)
      (lambda (s)
        (mplus*
-        (bind* s (list g0 g ...))
-        (bind* s (list g1 g^ ...)) ...))]))
+        (bind* s g0 g ...)
+        (bind* s g1 g^ ...) ...))]))
 
 
 ;;----------------------- top level -----------------------
