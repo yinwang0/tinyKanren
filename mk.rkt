@@ -80,11 +80,11 @@
 (define-syntax delay
   (syntax-rules ()
     [(_ e ...)
-     (thunk (lambda () e ...))]))
+     (lambda () e ...)]))
 
 (define force
   (lambda (th)
-    ((thunk-func th))))
+    (th)))
 
 (define flip
   (lambda (f)
@@ -95,8 +95,6 @@
   (lambda (v g)
     (match v
       [#f #f]
-      [(thunk _)
-       (delay (bind (force v) g))]
       [(stream head tail)
        (mplus (g head)
               (delay (bind (force tail) g)))]
@@ -110,8 +108,6 @@
   (lambda (v f)
     (match v
       [#f (force f)]
-      [(thunk _)
-       (delay (mplus (force f) v))]
       [(stream head tail)
        (stream head
                (delay (mplus (force f) tail)))]
@@ -138,19 +134,17 @@
   (syntax-rules ()
     [(_ (x ...) g0 g ...)
      (lambda (s)
-       (delay
          (let ([x (var 'x)] ...)
-           (bind* s (list g0 g ...)))))]))
+           (bind* s (list g0 g ...))))]))
 
 (define-syntax conde
   (syntax-rules ()
     [(_ [g0 g ...]
         [g1 g^ ...] ...)
      (lambda (s)
-       (delay
          (mplus*
           (bind* s (list g0 g ...))
-          (bind* s (list g1 g^ ...)) ...)))]))
+          (bind* s (list g1 g^ ...)) ...))]))
 
 
 ;;----------------------- top level -----------------------
@@ -162,10 +156,12 @@
       [else
        (match v
          [#f '()]
-         [(thunk _)
-          (take n (force v))]
          [(stream head tail)
-          (cons head (take (- n 1) tail))]
+          (cond
+            [(zero? (- n 1))  ; avoid (force tail)
+             (list head)]
+            [else
+             (cons head (take (- n 1) (force tail)))])]
          [_ (list v)])])))
 
 (define do-display #f)
