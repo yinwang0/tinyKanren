@@ -95,6 +95,8 @@
   (lambda (v g)
     (match v
       [#f #f]
+      [(thunk _)
+       (delay (bind (force v) g))]
       [(stream head tail)
        (mplus (g head)
               (delay (bind (force tail) g)))]
@@ -113,7 +115,9 @@
 (define mplus
   (lambda (v f)
     (match v
-      [#f (force f)]
+      [#f f]
+      [(thunk _)
+       (delay (mplus (force v) f))]
       [(stream head tail)
        (stream head
                (delay (mplus (force f) tail)))]
@@ -131,7 +135,7 @@
 (define ==
   (lambda (u v)
     (lambda (s)
-      (unify u v s))))
+      (delay (unify u v s)))))
 
 (define succeed
   (lambda (s) s))
@@ -143,17 +147,19 @@
   (syntax-rules ()
     [(_ (x ...) g0 g ...)
      (lambda (s)
-       (let ([x (var 'x)] ...)
-         (bind* s g0 g ...)))]))
+       (delay
+         (let ([x (var 'x)] ...)
+           (bind* s g0 g ...))))]))
 
 (define-syntax conde
   (syntax-rules ()
     [(_ [g0 g ...]
         [g1 g^ ...] ...)
      (lambda (s)
-       (mplus*
-        (bind* s g0 g ...)
-        (bind* s g1 g^ ...) ...))]))
+       (delay
+         (mplus*
+          (bind* s g0 g ...)
+          (bind* s g1 g^ ...) ...)))]))
 
 
 ;;----------------------- top level -----------------------
@@ -165,6 +171,8 @@
       [else
        (match v
          [#f '()]
+         [(thunk _)
+          (take n (force v))]
          [(stream head tail)
           (cond
             [(zero? (- n 1))  ; avoid (force tail)
@@ -198,7 +206,7 @@
                       g0 g ...
                       (lambda (s)
                         (reify x s)))])
-         (take n (top-g empty-s))))]))
+         (take n (delay (top-g empty-s)))))]))
 
 (define-syntax run*
   (syntax-rules ()
