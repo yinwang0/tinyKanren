@@ -84,7 +84,9 @@
 
 (define force
   (lambda (th)
-    ((thunk-func th))))
+    (match th
+      [(thunk f) (force (f))]
+      [_ th])))
 
 (define flip
   (lambda (f)
