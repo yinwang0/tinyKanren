@@ -132,16 +132,16 @@
 
 ;;------------------- goal constructors -------------------
 
-(define ==
-  (lambda (u v)
-    (lambda (s)
-      (delay (unify u v s)))))
-
 (define succeed
   (lambda (s) s))
 
 (define fail
   (lambda (s) #f))
+
+(define ==
+  (lambda (u v)
+    (lambda (s)
+      (delay (unify u v s)))))
 
 (define-syntax exist
   (syntax-rules ()
