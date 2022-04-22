@@ -1,6 +1,6 @@
 #lang racket
 
-(provide run* run == exist conde succeed fail display-code var empty-s take)
+(provide run* run == exist conde succeed fail display-code var empty-s take bind)
 
 
 ;;--------------------- substitution ----------------------
@@ -91,7 +91,7 @@
 (define bind
   (lambda (g v)
     (match v
-      [#f #f]
+      ['() '()]
       [(thunk _)
        (delay (bind g (force v)))]
       [(stream head tail)
@@ -105,7 +105,7 @@
 (define mplus
   (lambda (v f)
     (match v
-      [#f f]
+      ['() f]
       [(thunk _)
        (delay (mplus (force v) f))]
       [(stream head tail)
@@ -122,15 +122,17 @@
 ;;------------------- goal constructors -------------------
 
 (define succeed
-  (lambda (s) s))
+  (lambda (s) (stream s '())))
 
 (define fail
-  (lambda (s) #f))
+  (lambda (s) '()))
 
 (define ==
   (lambda (u v)
     (lambda (s)
-      (delay (unify u v s)))))
+      (delay
+        (let ([s (unify u v s)])
+          (if s (succeed s) (fail s)))))))
 
 (define-syntax exist
   (syntax-rules ()
@@ -138,7 +140,7 @@
      (lambda (s)
        (delay
          (let ([x (var 'x)] ...)
-           (bind* s g0 g ...))))]))
+           (bind* (g0 s) g ...))))]))
 
 (define-syntax conde
   (syntax-rules ()
@@ -147,8 +149,8 @@
      (lambda (s)
        (delay
          (mplus*
-          (bind* s g0 g ...)
-          (bind* s g1 g^ ...) ...)))]))
+          (bind* (g0 s) g ...)
+          (bind* (g1 s) g^ ...) ...)))]))
 
 
 ;;----------------------- top level -----------------------
@@ -159,12 +161,12 @@
       [(zero? n) '()]
       [else
        (match v
-         [#f '()]
+         ['() '()]
          [(thunk _)
           (take n (force v))]
          [(stream head tail)
           (cons head (take (- n 1) tail))]
-         [_ (list v)])])))
+         [_ v])])))
 
 (define do-display #f)
 
@@ -190,7 +192,7 @@
        (let ([top-g (exist (x)
                       g0 g ...
                       (lambda (s)
-                        (reify x s)))])
+                        (succeed (reify x s))))])
          (take n (delay (top-g empty-s)))))]))
 
 (define-syntax run*
