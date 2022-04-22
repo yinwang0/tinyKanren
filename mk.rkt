@@ -100,8 +100,7 @@
       [(thunk _)
        (delay (bind (force v) g))]
       [(stream head tail)
-       (mplus (g head)
-              (delay (bind (force tail) g)))]
+       (mplus (g head) (bind tail g))]
       [_ (g v)])))
 
 (define bind*
@@ -121,8 +120,7 @@
       [(thunk _)
        (delay (mplus (force v) f))]
       [(stream head tail)
-       (stream head
-               (delay (mplus (force f) tail)))]
+       (stream head (mplus f tail))]
       [_ (stream v f)])))
 
 (define-syntax mplus*
