@@ -88,30 +88,19 @@
       [(thunk f) (force (f))]
       [_ th])))
 
-(define flip
-  (lambda (f)
-    (lambda (x y)
-      (f y x))))
-
 (define bind
-  (lambda (v g)
+  (lambda (g v)
     (match v
       [#f #f]
       [(thunk _)
-       (delay (bind (force v) g))]
+       (delay (bind g (force v)))]
       [(stream head tail)
-       (mplus (g head) (bind tail g))]
+       (mplus (g head) (bind g tail))]
       [_ (g v)])))
 
 (define bind*
   (lambda (v . gs)
-    (foldl (flip bind) v gs)))
-
-;(define-syntax bind*
-;  (syntax-rules ()
-;    [(_ e) e]
-;    [(_ e g0 g ...)     
-;     (bind* (bind e g0) g ...)]))
+    (foldl bind v gs)))
 
 (define mplus
   (lambda (v f)
