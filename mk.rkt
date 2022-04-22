@@ -133,8 +133,11 @@
     (lambda (s)
       (unify u v s))))
 
-(define succeed (== #f #f))
-(define fail (== #f #t))
+(define succeed
+  (lambda (s) s))
+
+(define fail
+  (lambda (s) #f))
 
 (define-syntax exist
   (syntax-rules ()
