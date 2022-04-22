@@ -95,8 +95,7 @@
       [(thunk _)
        (delay (bind g (force v)))]
       [(stream head tail)
-       (mplus (g head) (bind g tail))]
-      [_ (g v)])))
+       (mplus (g head) (bind g tail))])))
 
 (define bind*
   (lambda (v . gs)
@@ -109,8 +108,7 @@
       [(thunk _)
        (delay (mplus (force v) f))]
       [(stream head tail)
-       (stream head (mplus f tail))]
-      [_ (stream v f)])))
+       (stream head (mplus f tail))])))
 
 (define-syntax mplus*
   (syntax-rules ()
@@ -165,8 +163,7 @@
          [(thunk _)
           (take n (force v))]
          [(stream head tail)
-          (cons head (take (- n 1) tail))]
-         [_ v])])))
+          (cons head (take (- n 1) tail))])])))
 
 (define do-display #f)
 
