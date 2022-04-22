@@ -176,11 +176,7 @@
          [(thunk _)
           (take n (force v))]
          [(stream head tail)
-          (cond
-            [(zero? (- n 1))  ; avoid (force tail)
-             (list head)]
-            [else
-             (cons head (take (- n 1) (force tail)))])]
+          (cons head (take (- n 1) tail))]
          [_ (list v)])])))
 
 (define do-display #f)
