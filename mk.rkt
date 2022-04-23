@@ -106,7 +106,7 @@
     (match v
       ['() f]
       [(thunk _)
-       (delay (mplus (force f) v))]
+       (delay (mplus f (force v)))]
       [(stream head tail)
        (stream head (delay (mplus f tail)))])))
 
