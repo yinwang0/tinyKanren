@@ -85,7 +85,7 @@
 (define force
   (lambda (th)
     (match th
-      [(thunk f) (force (f))]
+      [(thunk f) (f)]
       [_ th])))
 
 (define bind
@@ -95,7 +95,7 @@
       [(thunk _)
        (delay (bind g (force v)))]
       [(stream head tail)
-       (mplus (g head) (bind g tail))])))
+       (mplus (g head) (delay (bind g tail)))])))
 
 (define bind*
   (lambda (v . gs)
@@ -106,9 +106,9 @@
     (match v
       ['() f]
       [(thunk _)
-       (delay (mplus (force v) f))]
+       (delay (mplus (force f) v))]
       [(stream head tail)
-       (stream head (mplus f tail))])))
+       (stream head (delay (mplus f tail)))])))
 
 (define-syntax mplus*
   (syntax-rules ()
