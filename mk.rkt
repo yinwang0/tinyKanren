@@ -1,6 +1,6 @@
 #lang racket
 
-(provide run* run == exist conde succeed fail display-code var empty-s take bind)
+(provide run* run == exist conde succeed fail display-code var empty-s take bind trace)
 
 
 ;;--------------------- substitution ----------------------
@@ -149,6 +149,13 @@
          (mplus*
           (bind* (g0 s) g ...)
           (bind* (g1 s) g^ ...) ...)))]))
+
+(define-syntax trace
+  (syntax-rules ()
+    [(_ v)
+     (lambda (s)
+       (printf "~a=~a: ~a~n" 'v v (reify v s))
+       (succeed s))]))
 
 
 ;;----------------------- top level -----------------------
