@@ -152,13 +152,13 @@
 
 (define-syntax trace
   (syntax-rules ()
-    [(_ msg v)
+    [(_ msg v ...)
      (lambda (s)
-       (printf "~a~a: ~a~n" msg 'v (reify v s))
+       (printf "~a~a: ~a~n" msg 'v (reify v s)) ...
        (succeed s))]
-    [(_ v)
+    [(_ v ...)
      (lambda (s)
-       (printf "~a~a: ~a~n" msg 'v (reify v s))
+       (printf "~a: ~a~n" 'v (reify v s)) ...
        (succeed s))]))
 
 
