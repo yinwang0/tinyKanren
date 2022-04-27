@@ -155,10 +155,6 @@
     [(_ msg v ...)
      (lambda (s)
        (printf "~a~a: ~a~n" msg 'v (reify v s)) ...
-       (succeed s))]
-    [(_ v ...)
-     (lambda (s)
-       (printf "~a: ~a~n" 'v (reify v s)) ...
        (succeed s))]))
 
 
