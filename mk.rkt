@@ -138,7 +138,7 @@
      (lambda (s)
        (delay
          (let ([x (var 'x)] ...)
-           (bind* (g0 s) g ...))))]))
+           (bind* (succeed s) g0 g ...))))]))
 
 (define-syntax conde
   (syntax-rules ()
@@ -147,8 +147,8 @@
      (lambda (s)
        (delay
          (mplus*
-          (bind* (g0 s) g ...)
-          (bind* (g1 s) g^ ...) ...)))]))
+          (bind* (succeed s) g0 g ...)
+          (bind* (succeed s) g1 g^ ...) ...)))]))
 
 (define-syntax trace
   (syntax-rules ()
