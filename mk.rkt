@@ -1,6 +1,6 @@
 #lang racket
 
-(provide run* run == exist conde succeed fail display-code var empty-s take bind trace)
+(provide run* run == exist conde succeed fail display-code set-name-prefix var empty-s take bind walk trace)
 
 
 ;;--------------------- substitution ----------------------
@@ -50,10 +50,16 @@
         [(equal? u v) s]
         [else #f]))))
 
+(define name-prefix "_")
+
+(define set-name-prefix
+  (lambda (s)
+    (set! name-prefix s)))
+
 (define name
   (lambda (n)
     (string->symbol
-     (string-append "_" (number->string n)))))
+     (string-append name-prefix (number->string n)))))
 
 (define reify-s
   (lambda (v s)
