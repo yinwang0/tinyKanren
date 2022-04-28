@@ -1,6 +1,6 @@
 #lang racket
 
-(provide run* run == exist conde succeed fail display-code set-name-prefix var empty-s take bind walk trace)
+(provide (all-defined-out))
 
 
 ;;--------------------- substitution ----------------------
