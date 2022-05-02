@@ -103,9 +103,18 @@
       [(stream head tail)
        (mplus (g head) (delay (bind g tail)))])))
 
+#;(define-syntax bind*
+  (syntax-rules ()
+    ((_ e) e)
+    ((_ e g0 g ...) (bind* (bind e g0) g ...))))
+
 (define bind*
   (lambda (v . gs)
-    (foldl bind v gs)))
+    ;; (foldl bind v gs)
+    (cond
+      [(null? gs) v]
+      [else
+       (apply bind* (bind (car gs) v) (cdr gs))])))
 
 (define mplus
   (lambda (v f)
@@ -116,11 +125,18 @@
       [(stream head tail)
        (stream head (delay (mplus f tail)))])))
 
-(define-syntax mplus*
+#;(define-syntax mplus*
   (syntax-rules ()
     [(_ e) e]
     [(_ e0 e ...)
      (mplus e0 (delay (mplus* e ...)))]))
+
+(define mplus*
+  (lambda (e . res)
+    (cond
+     [(null? res) e]
+     [else
+      (mplus e (delay (apply mplus* res)))])))
 
 
 ;;------------------- goal constructors -------------------
